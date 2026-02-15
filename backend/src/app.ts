@@ -24,14 +24,14 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+app.use("/api/auth", authRoutes);
+
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: "Route not found",
   });
 });
-
-app.use("/api/auth", authRoutes);
 
 app.use(errorMiddleware);
 export default app;

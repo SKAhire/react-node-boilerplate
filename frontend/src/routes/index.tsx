@@ -1,13 +1,38 @@
 import Login from "@/pages/login";
 import Home from "../pages/home";
-import { Route, Routes } from "react-router-dom";
 import Register from "@/pages/Register";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "@/components/protected-route";
+import { PublicRoute } from "@/components/public-route";
 export default function AppRoute() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="sign-up" element={<Register />} />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      {/* Redirect root to chat if authenticated, otherwise to login */}
+      <Route path="/" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

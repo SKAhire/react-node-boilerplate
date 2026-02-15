@@ -1,5 +1,9 @@
 import RegisterPage from "@/components/signup-page";
 
 export default function Register() {
-  return <RegisterPage />;
+  return (
+    <div className="w-full flex items-center justify-center">
+      <RegisterPage />
+    </div>
+  );
 }
