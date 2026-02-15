@@ -55,4 +55,78 @@ export class AuthController {
       next(error);
     }
   }
+
+  /**
+   * Request password reset
+   * POST /api/auth/forgot-password
+   */
+  async forgotPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      // Validate required field
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          error: "Email is required",
+        });
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid email format",
+        });
+        return;
+      }
+
+      const result = await authService.forgotPassword(email);
+
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Reset password
+   * POST /api/auth/reset-password
+   */
+  async resetPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const { token, password } = req.body;
+
+      // Validate required fields
+      if (!token || !password) {
+        res.status(400).json({
+          success: false,
+          error: "Token and new password are required",
+        });
+        return;
+      }
+
+      const result = await authService.resetPassword(token, password);
+
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

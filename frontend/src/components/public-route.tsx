@@ -21,12 +21,12 @@ export function PublicRoute({ children }: PublicRouteProps) {
     );
   }
 
-  // If already authenticated, redirect to chat
+  // If already authenticated, redirect to home
   if (isAuthenticated) {
-    // Get the saved location or default to /chat
+    // Get the saved location or default to /
     const from =
       (location.state as { from?: { pathname: string } })?.from?.pathname ||
-      "/chat";
+      "/";
     return <Navigate to={from} replace />;
   }
 

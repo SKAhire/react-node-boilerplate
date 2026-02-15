@@ -20,5 +20,18 @@ model User {
   name            String?
   passwordHash    String
   lastSeen        DateTime?
+  passwordReset   PasswordReset[]
 
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
 }

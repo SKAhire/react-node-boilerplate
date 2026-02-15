@@ -13,24 +13,19 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeClosed } from "lucide-react";
-import { useAuth } from "@/context/auth-context";
+import { Link } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// Zod validation schema for login
-const loginSchema = z.object({
+// Zod validation schema for forgot password
+const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-export default function LoginPage() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+export function ForgotPasswordPage() {
+  const [serverMessage, setServerMessage] = useState("");
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,16 +33,17 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setServerError("");
+    setServerMessage("");
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,14 +54,14 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Login failed");
+        throw new Error(result.error || "Failed to process request");
       }
 
-      // Store token and user info
-      login(result.data.token, result.data.user);
-
-      // Redirect to home page
-      navigate("/");
+      // Show success message
+      setServerMessage(
+        result.message ||
+        "If an account with that email exists, a password reset link has been sent.",
+      );
     } catch (err) {
       setServerError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -78,10 +74,11 @@ export default function LoginPage() {
       <Card className="w-full max-w-md border-none shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Login
+            Reset Password
           </CardTitle>
           <CardDescription>
-            Enter your email and password to access your account
+            Enter your email address and we'll send you a link to reset your
+            password
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -91,6 +88,11 @@ export default function LoginPage() {
                 {serverError}
               </div>
             )}
+            {serverMessage && (
+              <div className="p-3 text-sm text-green-600 bg-green-50 rounded-md">
+                {serverMessage}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -98,44 +100,10 @@ export default function LoginPage() {
                 type="email"
                 placeholder="name@example.com"
                 {...register("email")}
+                disabled={loading || !!serverMessage}
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  to={"/forgot-password"}
-                  className="text-sm text-primary hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  {...register("password")}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground bg-transparent! p-0!"
-                >
-                  {showPassword ? (
-                    <Eye className="bg-none" size={24} />
-                  ) : (
-                    <EyeClosed className="bg-none" size={24} />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
               )}
             </div>
           </CardContent>
@@ -143,17 +111,17 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full font-semibold"
-              disabled={loading}
+              disabled={loading || !!serverMessage}
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Sending..." : "Send Reset Link"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              {"Don't have an account? "}
+              {"Remember your password? "}
               <Link
-                to={"/register"}
+                to={"/login"}
                 className="text-primary hover:underline font-medium"
               >
-                Create an account
+                Back to login
               </Link>
             </p>
           </CardFooter>

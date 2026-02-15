@@ -1,6 +1,8 @@
 import Login from "@/pages/login";
-import Home from "../pages/home";
+import Home from "@/pages/home";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/protected-route";
 import { PublicRoute } from "@/components/public-route";
@@ -24,6 +26,22 @@ export default function AppRoute() {
         }
       />
       <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
         path="/"
         element={
           <ProtectedRoute>
@@ -31,7 +49,7 @@ export default function AppRoute() {
           </ProtectedRoute>
         }
       />
-      {/* Redirect root to chat if authenticated, otherwise to login */}
+      {/* Redirect root to home if authenticated, otherwise to login */}
       <Route path="/" element={<Navigate to="/" replace />} />
     </Routes>
   );
